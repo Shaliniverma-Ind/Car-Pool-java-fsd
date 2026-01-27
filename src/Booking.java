@@ -1,11 +1,11 @@
 public class Booking {
     int booking_id;
     Ride ride;
-    user user;
+    User user;
     int seats_booked;
     double total_fare;
 
-    public Booking(int booking_id, user user, Ride ride, int seats_booked, double total_fare) {
+    public Booking(int booking_id, User user, Ride ride, int seats_booked, double total_fare) {
         this.booking_id = booking_id;
         this.user = user;
         this.ride = ride;

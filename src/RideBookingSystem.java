@@ -3,19 +3,19 @@ import java.util.List;
 
 public class RideBookingSystem {
 
-    List<user> users = new ArrayList<>();
+    List<User> Users = new ArrayList<>();
     List<Ride> rideList = new ArrayList<>();
     List<Booking> bookingList = new ArrayList<>();
 
     int bookingCounter = 1;
 
     public void signup(int id, String name, String email, int password) {
-        user u = new user(id, name, email, password);
-        users.add(u);
+        User u = new User(id, name, email, password);
+        Users.add(u);
         System.out.println("Signup successful for " + name);
     }
-    public user login(String email, int password) {
-        for (user u : users) {
+    public User login(String email, int password) {
+        for (User u : Users) {
             if (u.email.equals(email) && u.password == password) {
                 System.out.println("Login successful: " + u.name);
                 return u;
@@ -25,7 +25,7 @@ public class RideBookingSystem {
         return null;
     }
 
-    public void updateUserDetails(user u, String newName, int newPassword) {
+    public void updateUserDetails(User u, String newName, int newPassword) {
 
         if (u == null) {
             System.out.println("Update failed: user not logged in");
@@ -40,18 +40,18 @@ public class RideBookingSystem {
     }
 
     // DELETE USER DETAILS
-    public void deleteUserDetails(user u) {
+    public void deleteUserDetails(User u) {
 
         if (u == null) {
             System.out.println("Delete failed: user not logged in");
             return;
         }
 
-        users.remove(u);
+        Users.remove(u);
         System.out.println("User deleted successfully");
     }
     public void createRide(int id, String source, String destination,
-                           int totalSeats, double fare, user user) {
+                           int totalSeats, double fare, User user) {
 
         Ride ride = new Ride(
                 id,
@@ -112,7 +112,7 @@ public class RideBookingSystem {
         System.out.println("Ride deleted successfully");
     }
 
-    public void bookRide(Ride ride,user user,int seats_booked ){
+    public void bookRide(Ride ride, User user, int seats_booked ){
         // search ride
         // available seats
         // fare calculate
@@ -120,7 +120,7 @@ public class RideBookingSystem {
         // seats update
     }
 
-    public List<Ride> viewRideCreated(user user) {
+    public List<Ride> viewRideCreated(User user) {
 
         List<Ride> createdRides = new ArrayList<>();
 
@@ -136,7 +136,7 @@ public class RideBookingSystem {
         return createdRides;
     }
 
-    public List<Ride> viewRideBooked(user user) {
+    public List<Ride> viewRideBooked(User user) {
 
         List<Ride> bookedRides = new ArrayList<>();
 

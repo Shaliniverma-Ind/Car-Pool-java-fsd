@@ -5,7 +5,7 @@ public class Ride {
     int total_seats;
     int available_seats;
     double fare;
-    user user;
+    User user;
 
 
     @Override
@@ -21,7 +21,7 @@ public class Ride {
                 '}';
     }
 
-    public Ride(int id, String source, String destination, int total_seats, int available_seats, double fare, user user) {
+    public Ride(int id, String source, String destination, int total_seats, int available_seats, double fare, User user) {
         this.id = id;
         this.source = source;
         this.destination = destination;
