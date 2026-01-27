@@ -5,7 +5,7 @@ public class RideBookingSystem {
 
     List<user> users = new ArrayList<>();
     List<Ride> rideList = new ArrayList<>();
-    List<booking> bookingList = new ArrayList<>();
+    List<Booking> bookingList = new ArrayList<>();
 
     int bookingCounter = 1;
 
@@ -144,7 +144,7 @@ public class RideBookingSystem {
             return bookedRides;
         }
 
-        for (booking b : bookingList) {
+        for (Booking b : bookingList) {
             if (b.user.equals(user)) {
                 bookedRides.add(b.ride);
             }
@@ -152,7 +152,7 @@ public class RideBookingSystem {
         return bookedRides;
     }
 
-    public void updateBooking(booking b, int newSeatsBooked) {
+    public void updateBooking(Booking b, int newSeatsBooked) {
 
         int oldSeats = b.seats_booked;
         Ride ride = b.ride;
@@ -181,7 +181,7 @@ public class RideBookingSystem {
         System.out.println("Booking updated successfully!");
         System.out.println(b);
     }
-    public void deleteBooking(booking b) {
+    public void deleteBooking(Booking b) {
 
         // Restore seats
         b.ride.available_seats += b.seats_booked;
