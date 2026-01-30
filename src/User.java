@@ -1,3 +1,4 @@
+
 public class User {
     int user_id;
     String name;
@@ -20,4 +21,5 @@ public class User {
         this.email = email;
         this.password = password;
     }
+
 }
