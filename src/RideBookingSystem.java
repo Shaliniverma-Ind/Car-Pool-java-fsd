@@ -1,209 +1,250 @@
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 
 public class RideBookingSystem {
 
-    List<User> Users = new ArrayList<>();
-    List<Ride> rideList = new ArrayList<>();
-    List<Booking> bookingList = new ArrayList<>();
+    public User signup(String name, String email, String password) {
 
-    int bookingCounter = 1;
+        User user = null;
 
-    public void signup(int id, String name, String email, int password) {
-        User u = new User(id, name, email, password);
-        Users.add(u);
-        System.out.println("Signup successful for " + name);
-    }
-    public User login(String email, int password) {
-        for (User u : Users) {
-            if (u.email.equals(email) && u.password == password) {
-                System.out.println("Login successful: " + u.name);
-                return u;
-            }
-        }
-        System.out.println("Invalid email or password");
-        return null;
-    }
+        try {
 
-    public void updateUserDetails(User u, String newName, int newPassword) {
+            Connection conn = DBConnection.getConnection();
 
-        if (u == null) {
-            System.out.println("Update failed: user not logged in");
-            return;
-        }
+            String checkSql = "SELECT userid FROM users WHERE email = ?";
+            PreparedStatement checkPs = conn.prepareStatement(checkSql);
+            checkPs.setString(1, email);
 
-        u.name = newName;
-        u.password = newPassword;
+            ResultSet checkRs = checkPs.executeQuery();
 
-        System.out.println("User details updated successfully");
-        System.out.println(u);
-    }
+            if (checkRs.next()) {
 
-    // DELETE USER DETAILS
-    public void deleteUserDetails(User u) {
-
-        if (u == null) {
-            System.out.println("Delete failed: user not logged in");
-            return;
-        }
-
-        Users.remove(u);
-        System.out.println("User deleted successfully");
-    }
-    public void createRide(int id, String source, String destination,
-                           int totalSeats, double fare, User user) {
-
-        Ride ride = new Ride(
-                id,
-                source,
-                destination,
-                totalSeats,
-                totalSeats,   // available seats initially = total seats
-                fare,
-                user
-        );
-
-        rideList.add(ride);
-        System.out.println("Ride created successfully");
-    }
-
-    public List<Ride> searchRide(String source, String destination, int seats) {
-
-        List<Ride> availableRide = new ArrayList<>();
-
-        for (Ride ride : rideList) {
-            if (ride.source.equalsIgnoreCase(source)
-                    && ride.destination.equalsIgnoreCase(destination)
-                    && ride.available_seats >= seats) {
-
-                availableRide.add(ride);
-            }
-        }
-        return availableRide;
-    }
-
-    // UPDATE RIDE
-    public void updateRide(Ride ride, String newSource, String newDestination,
-                           int newTotalSeats, double newFare) {
-
-        if (ride == null) {
-            System.out.println("Update failed: Ride not found");
-            return;
-        }
-
-        ride.source = newSource;
-        ride.destination = newDestination;
-        ride.total_seats = newTotalSeats;
-        ride.available_seats = newTotalSeats;
-        ride.fare = newFare;
-
-        System.out.println("Ride updated successfully");
-        System.out.println(ride);
-    }
-    // DELETE RIDE
-    public void deleteRide(Ride ride) {
-
-        if (ride == null) {
-            System.out.println("Delete failed: Ride not found");
-            return;
-        }
-
-        rideList.remove(ride);
-        System.out.println("Ride deleted successfully");
-    }
-
-    public void bookRide(Ride ride, User user, int seats_booked ){
-        // search ride
-        // available seats
-        // fare calculate
-        // booking create
-        // seats update
-    }
-
-    public List<Ride> viewRideCreated(User user) {
-
-        List<Ride> createdRides = new ArrayList<>();
-
-        if (user == null) {
-            return createdRides;
-        }
-
-        for (Ride ride : rideList) {
-            if (ride.user.equals(user)) {
-                createdRides.add(ride);
-            }
-        }
-        return createdRides;
-    }
-
-    public List<Ride> viewRideBooked(User user) {
-
-        List<Ride> bookedRides = new ArrayList<>();
-
-        if (user == null) {
-            return bookedRides;
-        }
-
-        for (Booking b : bookingList) {
-            if (b.user.equals(user)) {
-                bookedRides.add(b.ride);
-            }
-        }
-        return bookedRides;
-    }
-
-    public void updateBooking(Booking b, int newSeatsBooked) {
-
-        int oldSeats = b.seats_booked;
-        Ride ride = b.ride;
-
-        // Case 1: Increase seats
-        if (newSeatsBooked > oldSeats) {
-            int extraSeatsNeeded = newSeatsBooked - oldSeats;
-
-            if (ride.available_seats < extraSeatsNeeded) {
-                System.out.println("Update failed: Not enough seats available");
-                return;
+                System.out.println("Account already exists");
+                return null;
             }
 
-            ride.available_seats -= extraSeatsNeeded;
+            String sql = "INSERT INTO users(name,email,pass) VALUES (?,?,?) RETURNING userid";
+
+            PreparedStatement ps = conn.prepareStatement(sql);
+
+            ps.setString(1, name);
+            ps.setString(2, email);
+            ps.setString(3, password);
+
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+
+                int id = rs.getInt("userid");
+
+                user = new User(id, name, email, password);
+
+                System.out.println("Signup successful");
+            }
+
         }
-        // Case 2: Decrease seats
-        else if (newSeatsBooked < oldSeats) {
-            int seatsToReturn = oldSeats - newSeatsBooked;
-            ride.available_seats += seatsToReturn;
+        catch (Exception e) {
+
+            e.printStackTrace();
         }
 
-        // Update booking details
-        b.seats_booked = newSeatsBooked;
-        b.total_fare = newSeatsBooked * ride.fare;
-
-        System.out.println("Booking updated successfully!");
-        System.out.println(b);
-    }
-    public void deleteBooking(Booking b) {
-
-        // Restore seats
-        b.ride.available_seats += b.seats_booked;
-
-        // Remove booking
-        bookingList.remove(b);
-
-        System.out.println("Booking deleted successfully!");
+        return user;
     }
 
 
+    public User login(String email, String password) {
+
+        User user = null;
+
+        try {
+
+            Connection conn = DBConnection.getConnection();
+
+            String sql = "SELECT userid, name FROM users WHERE email = ? AND pass = ?";
+
+            PreparedStatement ps = conn.prepareStatement(sql);
+
+            ps.setString(1, email);
+            ps.setString(2, password);
+
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+
+                int id = rs.getInt("userid");
+
+                String name = rs.getString("name");
+
+                user = new User(id, name, email, password);
+
+                System.out.println("Login successful");
+            }
+            else {
+
+                System.out.println("Invalid login");
+            }
+
+        }
+        catch (Exception e) {
+
+            e.printStackTrace();
+        }
+
+        return user;
+    }
+
+
+    public int createRide(String source,
+                          String destination,
+                          int seats,
+                          double fare,
+                          User user) {
+
+        int rideId = -1;
+
+        try {
+
+            Connection conn = DBConnection.getConnection();
+
+            String sql = """
+                    INSERT INTO ride(
+                    source,
+                    dest,
+                    total_seats,
+                    available_seats,
+                    fare,
+                    created_by)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                    RETURNING ride_id
+                    """;
+
+            PreparedStatement ps = conn.prepareStatement(sql);
+
+            ps.setString(1, source);
+            ps.setString(2, destination);
+            ps.setInt(3, seats);
+            ps.setInt(4, seats);
+            ps.setDouble(5, fare);
+            ps.setInt(6, user.user_id);
+
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+
+                rideId = rs.getInt("ride_id");
+
+                System.out.println("Ride created with Ride ID: " + rideId);
+            }
+
+        }
+        catch (Exception e) {
+
+            e.printStackTrace();
+        }
+
+        return rideId;
+    }
+
+
+    public List<Ride> viewAllRidesFromDB() {
+
+        List<Ride> rides = new ArrayList<>();
+
+        try {
+
+            Connection conn = DBConnection.getConnection();
+
+            String sql = """
+                    SELECT r.ride_id,
+                           r.source,
+                           r.dest,
+                           r.total_seats,
+                           r.available_seats,
+                           r.fare,
+                           u.userid,
+                           u.name
+                    FROM ride r
+                    JOIN users u
+                    ON r.created_by = u.userid
+                    ORDER BY r.ride_id
+                    """;
+
+            PreparedStatement ps = conn.prepareStatement(sql);
+
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+
+                int rideId = rs.getInt("ride_id");
+                String source = rs.getString("source");
+                String dest = rs.getString("dest");
+                int totalSeats = rs.getInt("total_seats");
+                int availableSeats = rs.getInt("available_seats");
+                double fare = rs.getDouble("fare");
+                int uid = rs.getInt("userid");
+                String uname = rs.getString("name");
+
+                User owner = new User(uid, uname, null, null);
+
+                Ride ride = new Ride(
+                        rideId,
+                        source,
+                        dest,
+                        totalSeats,
+                        availableSeats,
+                        fare,
+                        owner
+                );
+
+                rides.add(ride);
+            }
+
+        }
+        catch (Exception e) {
+
+            e.printStackTrace();
+        }
+
+        return rides;
+    }
+
+
+    public void bookRide(int rideId,
+                         User user,
+                         int seats,
+                         int totalFare) {
+
+        try {
+
+            Connection conn = DBConnection.getConnection();
+
+            String sql = """
+                    INSERT INTO booking(
+                    ride_id,
+                    userid,
+                    seats_booked,
+                    total_fare)
+                    VALUES (?, ?, ?, ?)
+                    """;
+
+            PreparedStatement ps = conn.prepareStatement(sql);
+
+            ps.setInt(1, rideId);
+            ps.setInt(2, user.user_id);
+            ps.setInt(3, seats);
+            ps.setInt(4, totalFare);
+
+            ps.executeUpdate();
+
+            System.out.println("Ride booked successfully");
+
+        }
+        catch (Exception e) {
+
+            e.printStackTrace();
+        }
+    }
 }
-//future scope:
-//time
-//Authentication & Authorization
-//admin
-//mul location
-//price bargain
-//AI chatbot & fare recommendation
-//review
-//chat
-
-
-
-

@@ -1,24 +1,121 @@
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
-import java.sql.Connection;
 import java.util.List;
-import java.util.ArrayList;
+import java.util.Scanner;
+
 public class Main {
-    public static void main(String[] args){
-        RideBookingSystem rideBookingSystem = new RideBookingSystem();
-        rideBookingSystem.createRide(1,"jaipur","delhi",5,725.00,new User(12331,"shALINI","sfffss",13312313));
-        rideBookingSystem.createRide(4,"jaipur","delhi",1,555.00,new User(122221,"shI","fss",22222313));
-        rideBookingSystem.createRide(2,"greator noida","agra",3,340.00,new User(31,"sI","fffs",13));
-        rideBookingSystem.createRide(3,"gurugram","faridabad",2,170.00,new User(555,"sFGDGDGD","sWEDFWSFs",1333333));
-          //System.out.println(rideBookingSystem.showAllRide());
-          System.out.println(rideBookingSystem.searchRide("jaipur","agra",2));
 
-        Connection conn =   DBConnection.getConnection();
+    public static void main(String[] args) {
 
-        if (conn != null) {
-            System.out.println("PostgreSQL connected successfully from Java!");
-        } else {
-            System.out.println("Database connection failed!");
+        Scanner sc = new Scanner(System.in);
+
+        RideBookingSystem system = new RideBookingSystem();
+
+        User currentUser = null;
+
+        while (true) {
+
+            System.out.println("\n1 Create Account");
+            System.out.println("2 Login");
+            System.out.println("3 Create Ride");
+            System.out.println("4 View Rides");
+            System.out.println("5 Book Ride");
+            System.out.println("0 Exit");
+
+            System.out.print("Enter choice: ");
+
+            int choice = sc.nextInt();
+
+            sc.nextLine();
+
+            switch (choice) {
+
+                case 1:
+
+                    System.out.print("Enter name: ");
+                    String name = sc.nextLine();
+
+                    System.out.print("Enter email: ");
+                    String email = sc.nextLine();
+
+                    System.out.print("Enter password: ");
+                    String password = sc.nextLine();
+
+                    currentUser = system.signup(name, email, password);
+
+                    break;
+
+
+                case 2:
+
+                    System.out.print("Enter email: ");
+                    email = sc.nextLine();
+
+                    System.out.print("Enter password: ");
+                    password = sc.nextLine();
+
+                    currentUser = system.login(email, password);
+
+                    break;
+
+
+                case 3:
+
+                    if (currentUser == null) {
+                        System.out.println("Login first");
+                        break;
+                    }
+
+                    System.out.print("Enter source: ");
+                    String source = sc.nextLine();
+
+                    System.out.print("Enter destination: ");
+                    String dest = sc.nextLine();
+
+                    System.out.print("Enter seats: ");
+                    int seats = sc.nextInt();
+
+                    System.out.print("Enter fare: ");
+                    double fare = sc.nextDouble();
+
+                    system.createRide(source, dest, seats, fare, currentUser);
+
+                    break;
+
+
+                case 4:
+
+                    List<Ride> rides = system.viewAllRidesFromDB();
+
+                    for (Ride r : rides)
+                        System.out.println(r);
+
+                    break;
+
+
+                case 5:
+
+                    if (currentUser == null) {
+                        System.out.println("Login first");
+                        break;
+                    }
+
+                    System.out.print("Enter ride ID: ");
+                    int rideId = sc.nextInt();
+
+                    System.out.print("Enter seats: ");
+                    seats = sc.nextInt();
+
+                    System.out.print("Enter total fare: ");
+                    int totalFare = sc.nextInt();
+
+                    system.bookRide(rideId, currentUser, seats, totalFare);
+
+                    break;
+
+
+                case 0:
+
+                    System.exit(0);
+            }
         }
     }
 }
